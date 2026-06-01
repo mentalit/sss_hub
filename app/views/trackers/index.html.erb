@@ -1,0 +1,32 @@
+<h1>Counter Tracker for <%= @store.Storename %></h1>
+
+<%= link_to 'Upload Another File',
+            new_store_tracker_path(@store) %>
+
+<table border="1" cellpadding="10" style="margin-top: 20px;">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>ArtNum</th>
+      <th>Art Name</th>
+      <th>BOH</th>
+      <th>Price</th>
+      <th>Comment</th>
+      <th>counter</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @trackers.each do |tracker| %>
+      <tr>
+        <td><%= tracker.date %></td>
+        <td><%= tracker.art_num %></td>
+        <td><%= tracker.art_name %></td>
+        <td><%= tracker.boh %></td>
+        <td><%= tracker.price %></td>
+        <td><%= tracker.comment %></td>
+        <td><%= tracker.counter %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

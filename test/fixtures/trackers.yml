@@ -1,0 +1,31 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  art_num: MyString
+  art_name: MyString
+  boh: 1
+  counter: MyString
+  initial_diff: 1
+  sss_inv_count: 1
+  price: 1.5
+  initial_loss: 1.5
+  diff_after_recount: 1
+  loss_after_recount: 1.5
+  slid_h: MyString
+  comment: MyText
+  store: one
+
+two:
+  art_num: MyString
+  art_name: MyString
+  boh: 1
+  counter: MyString
+  initial_diff: 1
+  sss_inv_count: 1
+  price: 1.5
+  initial_loss: 1.5
+  diff_after_recount: 1
+  loss_after_recount: 1.5
+  slid_h: MyString
+  comment: MyText
+  store: two

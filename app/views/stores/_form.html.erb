@@ -1,0 +1,27 @@
+<%= form_with(model: store) do |form| %>
+  <% if store.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(store.errors.count, "error") %> prohibited this store from being saved:</h2>
+
+      <ul>
+        <% store.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :Storename, style: "display: block" %>
+    <%= form.text_field :Storename %>
+  </div>
+
+  <div>
+    <%= form.label :storenum, style: "display: block" %>
+    <%= form.number_field :storenum %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

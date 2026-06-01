@@ -1,0 +1,21 @@
+<h1>Upload Tracker Excel File</h1>
+
+<p>
+  Store:
+  <strong><%= @store.Storename %></strong>
+</p>
+
+<%= form_with url: store_trackers_path(@store),
+              multipart: true,
+              local: true do |form| %>
+
+  <div>
+    <%= form.file_field :file,
+                        accept: '.xlsx,.xls' %>
+  </div>
+
+  <div style="margin-top: 20px;">
+    <%= form.submit 'Upload Excel' %>
+  </div>
+
+<% end %>
