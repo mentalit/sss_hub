@@ -30,6 +30,8 @@ gem "solid_cache"
 gem "solid_queue"
 gem "solid_cable"
 
+gem "pdf-reader"
+
 gem 'roo'
 gem 'roo-xls'
 

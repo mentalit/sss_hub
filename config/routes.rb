@@ -1,7 +1,7 @@
-Rails.application.routes.draw do
- 
- 
 
+ 
+ 
+Rails.application.routes.draw do
   
   
   
@@ -15,13 +15,15 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  # Defines the root path route ("/")
+ 
+ 
+ 
   root "stores#index"
-
  
   resources :stores, shallow: true do
     resources :trackers, only: [:index, :new, :create]
+    resources :pdf_imports, only: [:new, :create]   # ADD THIS LINE
+    get 'pdf_debug', to: 'pdf_imports#debug'
   end
-
-
 end
+

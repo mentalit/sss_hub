@@ -1,0 +1,21 @@
+<%# app/views/pdf_imports/new.html.erb %>
+
+<h1>Import PDF Report</h1>
+<h2>Store: <%= @store.Storename %></h2>
+
+<%= form_with url: store_pdf_imports_path(@store), method: :post, multipart: true do |f| %>
+  <% if flash[:alert] %>
+    <p style="color: red;"><%= flash[:alert] %></p>
+  <% end %>
+
+  <div>
+    <%= f.label :pdf_file, "Daily Stock Check Report (PDF)" %>
+    <%= f.file_field :pdf_file, accept: "application/pdf" %>
+  </div>
+
+  <div>
+    <%= f.submit "Import PDF" %>
+  </div>
+<% end %>
+
+<%= link_to "Back to Store", @store %>
