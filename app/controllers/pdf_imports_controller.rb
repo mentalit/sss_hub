@@ -15,43 +15,59 @@ class PdfImportsController < ApplicationController
   end
 
   def create
-    unless params[:pdf_file].present?
-      flash.now[:alert] = "Please select a PDF file."
+    files = Array(params[:pdf_files]).select { |f| f.respond_to?(:read) }
+
+    if files.empty?
+      flash.now[:alert] = "Please select at least one PDF file."
       return render :new, status: :unprocessable_entity
     end
 
-    result = PdfImportService.new(params[:pdf_file]).call
+    imported = []
+    skipped  = []
+    errors   = []
 
-    if result[:error].present?
-      flash.now[:alert] = "Could not parse PDF: #{result[:error]}"
-      return render :new, status: :unprocessable_entity
+    files.each do |file|
+      result = PdfImportService.new(file).call
+
+      if result[:error].present?
+        errors << "#{file.original_filename}: #{result[:error]}"
+        next
+      end
+
+      if result[:date] && @store.pdf_imports.exists?(report_date: result[:date])
+        skipped << "#{file.original_filename} (#{result[:date]} already imported)"
+        next
+      end
+
+      pdf_import = @store.pdf_imports.build(
+        report_date: result[:date],
+        pa_counts:   result[:pa_counts],
+        user_counts: result[:user_counts]
+      )
+
+      if pdf_import.save
+        imported << file.original_filename
+      else
+        errors << "#{file.original_filename}: #{pdf_import.errors.full_messages.to_sentence}"
+      end
     end
 
-    @pdf_import = @store.pdf_imports.build(
-      report_date: result[:date],
-      pa_counts:   result[:pa_counts],
-      user_counts: result[:user_counts]
-    )
+    messages = []
+    messages << "Imported: #{imported.join(', ')}"             if imported.any?
+    messages << "Skipped (duplicates): #{skipped.join(', ')}"  if skipped.any?
+    messages << "Errors: #{errors.join(', ')}"                 if errors.any?
 
-    if @pdf_import.save
-      redirect_to pdf_import_path(@pdf_import), notice: "PDF imported successfully."
-    else
-      flash.now[:alert] = "Could not save import: #{@pdf_import.errors.full_messages.to_sentence}"
-      render :new, status: :unprocessable_entity
-    end
+    redirect_to store_pdf_imports_path(@store), notice: messages.join(" | ")
   end
 
   private
 
   def set_store
-    if params[:store_id]
-        @store = Store.find(params[:store_id])
-      else
-        @store = PdfImport.find(params[:id]).store
-      end
+    @store = Store.find(params[:store_id])
   end
 
   def set_pdf_import
-    @pdf_import = @store.pdf_imports.find(params[:id])
+    @pdf_import = PdfImport.find(params[:id])
+    @store      ||= @pdf_import.store
   end
 end

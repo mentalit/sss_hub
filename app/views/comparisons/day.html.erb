@@ -7,7 +7,7 @@
   <%= f.submit "Go" %>
 <% end %>
 
-<%= render "error_chart", chart_data: @chart_data, period_label: @date.strftime("%B %d, %Y") %>
+<%= render "error_chart", chart_data: @chart_data, period_label: @period_label, user_charts: @user_charts, loss_total: @loss_total %>
 
 <% if @pdf_imports_for_date.count > 1 && @selected_pdf.nil? %>
   <h3>Multiple PDFs for this date — pick one:</h3>

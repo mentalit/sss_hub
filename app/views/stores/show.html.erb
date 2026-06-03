@@ -5,7 +5,11 @@
 <%= link_to 'Upload Tracker File',
                 new_store_tracker_path(@store) %>
 
+
+
 <div>
+
+<%= link_to 'Upload PDF Report', new_store_pdf_import_path(@store) %>
   <%= link_to "Edit this store", edit_store_path(@store) %> |
   <%= link_to "Back to stores", stores_path %>
 
@@ -14,13 +18,7 @@
 
   </div>
 
-<div class="card col-6">
-  
-  <%= line_chart({ "2026-01-01" => 2, "2026-01-02" => 5, "2026-01-03" => 3 }) %>
 
-
-
-</div>
 
 
 

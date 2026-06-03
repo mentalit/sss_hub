@@ -3,12 +3,14 @@
 <h1>Yearly Comparison</h1>
 <h2>Store: <%= @store.Storename %></h2>
 
-<%= form_with url: year_store_comparisons_path(@store), method: :get do |f| %>
-  <%= f.number_field :year, value: Date.today.year, min: 2020, max: Date.today.year %>
+<h2>Store: <%= @store.Storename %></h2>
+
+<%= form_with url: week_store_comparisons_path(@store), method: :get do |f| %>
+  <%= f.date_field :start_date %>
   <%= f.submit "Go" %>
 <% end %>
 
-<%= render "error_chart", chart_data: @chart_data, period_label: @period_label %>
+<%= render "error_chart", chart_data: @chart_data, period_label: @period_label, user_charts: @user_charts, loss_total: @loss_total %>
 
 <br>
 <%= link_to "Back to Store", @store %>

@@ -3,18 +3,23 @@
 <h1>Import PDF Report</h1>
 <h2>Store: <%= @store.Storename %></h2>
 
-<%= form_with url: store_pdf_imports_path(@store), method: :post, multipart: true do |f| %>
-  <% if flash[:alert] %>
-    <p style="color: red;"><%= flash[:alert] %></p>
-  <% end %>
+<% if flash[:alert] %>
+  <p style="color: red;"><%= flash[:alert] %></p>
+<% end %>
 
+<% if flash[:notice] %>
+  <p style="color: green;"><%= flash[:notice] %></p>
+<% end %>
+
+<%= form_with url: store_pdf_imports_path(@store), method: :post, multipart: true do |f| %>
   <div>
-    <%= f.label :pdf_file, "Daily Stock Check Report (PDF)" %>
-    <%= f.file_field :pdf_file, accept: "application/pdf" %>
+    <%= f.label :pdf_files, "Select PDF Report(s)" %>
+    <%= f.file_field :pdf_files, multiple: true, accept: "application/pdf" %>
+    <p style="color: #666; font-size: 0.85rem;">Hold Ctrl (or Cmd on Mac) to select multiple files.</p>
   </div>
 
   <div>
-    <%= f.submit "Import PDF" %>
+    <%= f.submit "Import PDF(s)" %>
   </div>
 <% end %>
 
