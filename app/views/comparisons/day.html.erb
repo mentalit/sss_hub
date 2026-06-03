@@ -1,0 +1,40 @@
+<%# app/views/comparisons/day.html.erb %>
+
+<h1>Daily Comparison</h1>Storename %></h2>
+
+<%= form_with url: day_store_comparisons_path(@store), method: :get do |f| %>
+  <%= f.date_field :date, value: @date %>
+  <%= f.submit "Go" %>
+<% end %>
+
+<%= render "error_chart", chart_data: @chart_data, period_label: @date.strftime("%B %d, %Y") %>
+
+<% if @pdf_imports_for_date.count > 1 && @selected_pdf.nil? %>
+  <h3>Multiple PDFs for this date — pick one:</h3>
+  <ul>
+    <% @pdf_imports_for_date.each do |pdf| %>
+      <li>
+        <%= link_to "Imported #{pdf.created_at.strftime('%Y-%m-%d %H:%M')}",
+              day_store_comparisons_path(@store, date: @date, pdf_import_id: pdf.id) %>
+      </li>
+    <% end %>
+  </ul>
+<% elsif @comparison %>
+  <table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+      <tr><th>User ID</th><th>PDF Count</th><th>Tracker Count</th></tr>
+    </thead>
+    <tbody>
+      <% @comparison.each do |row| %>
+        <tr>
+          <td><%= row[:user_id] %></td>
+          <td><%= row[:pdf_count] %></td>
+          <td><%= row[:tracker_count] %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
+
+<br>
+<%= link_to "Back to Store", @store %>

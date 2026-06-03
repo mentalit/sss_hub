@@ -1,0 +1,71 @@
+<%# app/views/comparisons/index.html.erb %>
+
+<h1>PDF vs Tracker Comparison</h1>
+<h2>Store: <%= @store.Storename %></h2>
+
+<% if @shared_dates.any? %>
+
+  <%# Step 1: Pick a date %>
+  <%= form_with url: store_comparisons_path(@store), method: :get do |f| %>
+    <div>
+      <%= f.label :date, "Select Date:" %>
+      <%= f.select :date,
+            @shared_dates.map { |d| [d.strftime("%B %d, %Y"), d.to_s] },
+            { include_blank: "-- Pick a date --", selected: params[:date] },
+            { onchange: "this.form.submit(); this.form.querySelector('#pdf_import_id').value = '';" } %>
+    </div>
+  <% end %>
+
+  <% if @selected_date && @pdf_imports_for_date.present? %>
+
+    <%# Step 2: Pick a PDF if multiple exist %>
+    <% if @pdf_imports_for_date.count > 1 && @selected_pdf.nil? %>
+      <h3>Multiple PDFs found for <%= @selected_date.strftime("%B %d, %Y") %> — pick one:</h3>
+      <ul>
+        <% @pdf_imports_for_date.each do |pdf| %>
+          <li>
+            <%= link_to "Imported #{pdf.created_at.strftime('%Y-%m-%d %H:%M')}",
+                  store_comparisons_path(@store, date: @selected_date, pdf_import_id: pdf.id) %>
+          </li>
+        <% end %>
+      </ul>
+
+    <% elsif @selected_pdf && @comparison.present? %>
+
+      <h3>
+        Comparison for <%= @selected_date.strftime("%B %d, %Y") %>
+        <% if @pdf_imports_for_date.count > 1 %>
+          <small>
+            (<%= link_to "change PDF", store_comparisons_path(@store, date: @selected_date) %>)
+          </small>
+        <% end %>
+      </h3>
+
+      <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+          <tr>
+            <th>User ID</th>
+            <th>PDF Count</th>
+            <th>Tracker Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @comparison.each do |row| %>
+            <tr>
+              <td><%= row[:user_id] %></td>
+              <td><%= row[:pdf_count] %></td>
+              <td><%= row[:tracker_count] %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+    <% end %>
+  <% end %>
+
+<% else %>
+  <p>No dates found with both a PDF import and tracker records for this store.</p>
+<% end %>
+
+<br>
+<%= link_to "Back to Store", @store %>

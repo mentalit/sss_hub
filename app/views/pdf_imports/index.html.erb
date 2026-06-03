@@ -1,0 +1,35 @@
+<%# app/views/pdf_imports/index.html.erb %>
+
+<h1>PDF Imports</h1>
+<h2>Store: <%= @store.Storename %></h2>
+
+<% if @pdf_imports.any? %>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <thead>
+      <tr>
+        <th>Report Date</th>
+        <th>PAs</th>
+        <th>Users</th>
+        <th>Imported At</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @pdf_imports.each do |import| %>
+        <tr>
+          <td><%= import.report_date %></td>
+          <td><%= import.pa_counts.keys.join(", ") %></td>
+          <td><%= import.user_counts.keys.join(", ") %></td>
+          <td><%= import.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+          <td><%= link_to "View", pdf_import_path(import) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No PDF imports yet.</p>
+<% end %>
+
+<br>
+<%= link_to "Upload PDF Report", new_store_pdf_import_path(@store) %> |
+<%= link_to "Back to Store", @store %>

@@ -1,0 +1,17 @@
+<%# app/views/comparisons/_error_chart.html.erb %>
+<%# Locals: chart_data (hash), period_label (string) %>
+
+<div style="margin: 1.5rem 0;">
+  <h3>Error Rate: <%= period_label %></h3>
+  <p style="color: #666; font-size: 0.9rem;">
+    % of tracker errors relative to total PDF counts
+  </p>
+  <%= line_chart chart_data,
+        xtitle: "Period",
+        ytitle: "Error %",
+        suffix: "%",
+        colors: ["#e74c3c"],
+        curve: false,
+        points: true,
+        library: { scales: { y: { min: 0 } } } %>
+</div>

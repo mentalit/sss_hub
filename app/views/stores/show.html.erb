@@ -1,6 +1,6 @@
-<p style="color: green"><%= notice %></p>
-
-<%= render @store %>
+<div class="row"> 
+  <div class="card col-2">
+    <%= render @store %>
 
 <%= link_to 'Upload Tracker File',
                 new_store_tracker_path(@store) %>
@@ -12,4 +12,24 @@
   <%= button_to "Destroy this store", @store, method: :delete %>
 </div>
 
+  </div>
+
+<div class="card col-6">
+  
+  <%= line_chart({ "2026-01-01" => 2, "2026-01-02" => 5, "2026-01-03" => 3 }) %>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+
 <%= link_to "Tracker", store_trackers_path(@store) %>
+
+
+

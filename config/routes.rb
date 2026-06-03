@@ -1,7 +1,4 @@
-
- 
- 
-Rails.application.routes.draw do
+ Rails.application.routes.draw do
   
   
   
@@ -16,14 +13,27 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
  
- 
- 
+# config/routes.rb
+
+
   root "stores#index"
- 
+
   resources :stores, shallow: true do
-    resources :trackers, only: [:index, :new, :create]
-    resources :pdf_imports, only: [:new, :create]   # ADD THIS LINE
-    get 'pdf_debug', to: 'pdf_imports#debug'
+    resources :trackers,     only: [:index, :new, :create]
+    resources :pdf_imports,  only: [:index, :new, :create, :show]
+    resources :comparisons,  only: [:index] do
+      collection do
+        get :landing
+        get :pas 
+        get :counters
+        get :day
+        get :week
+        get :month
+        get :year
+        get :life
+      end
+    end
+
   end
 end
 

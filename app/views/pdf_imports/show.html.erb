@@ -1,0 +1,54 @@
+<%# app/views/pdf_imports/show.html.erb %>
+
+<h1>PDF Import Results</h1>
+<h2>Store: <%= @store.Storename %></h2>
+
+<% if @pdf_import.report_date %>
+  <p><strong>Report Date:</strong> <%= @pdf_import.report_date %></p>
+<% end %>
+<p><strong>Imported At:</strong> <%= @pdf_import.created_at.strftime("%Y-%m-%d %H:%M") %></p>
+
+<div style="display: flex; gap: 3rem; margin-top: 1.5rem;">
+
+  <div>
+    <h3>PA Counts</h3>
+    <% if @pdf_import.pa_counts.any? %>
+      <table border="1" cellpadding="6" cellspacing="0">
+        <thead>
+          <tr><th>PA</th><th>Count</th></tr>
+        </thead>
+        <tbody>
+          <% @pdf_import.pa_counts.each do |pa, count| %>
+            <tr><td><%= pa %></td><td><%= count %></td></tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p>No PA data found.</p>
+    <% end %>
+  </div>
+
+  <div>
+    <h3>User ID Counts</h3>
+    <% if @pdf_import.user_counts.any? %>
+      <table border="1" cellpadding="6" cellspacing="0">
+        <thead>
+          <tr><th>User ID</th><th>Count</th></tr>
+        </thead>
+        <tbody>
+          <% @pdf_import.user_counts.each do |user_id, count| %>
+            <tr><td><%= user_id %></td><td><%= count %></td></tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p>No User ID data found.</p>
+    <% end %>
+  </div>
+
+</div>
+
+<br>
+<%= link_to "All Imports", store_pdf_imports_path(@store) %> |
+<%= link_to "Upload Another PDF", new_store_pdf_import_path(@store) %> |
+<%= link_to "Back to Store", @store %>

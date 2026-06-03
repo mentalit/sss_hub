@@ -1,20 +1,38 @@
-<p style="color: green"><%= notice %></p>
+<div class="row">
+  
+  <div class="col-6"><h1>Stores</h1>
+</div>
 
-<% content_for :title, "Stores" %>
+  <div class="col-6"><%= link_to "New store", new_store_path %></div>
+</div>
 
-<h1>Stores</h1>
 
-<% @stores.each do |store| %>
-  <div style="margin-bottom: 20px;">
-    <h3><%= store.Storename %></h3>
 
-    <%= link_to "Show this store", store %><br>
-
+<div class="row">
+  
+    <% @stores.each do |store| %>
     
-  </div>
+      <div class="card col-2">
+        <h3><%= store.Storename %></h3>
+
+        <%= link_to "Show this store", store %><br>
+</div>
+     
 <% end %>
+ 
 
 
-<%= link_to "New store", new_store_path %>
+
+
+
+</div>
+
+
+
+
+
+
+
+
 
 

@@ -1,27 +1,18 @@
 # app/controllers/pdf_imports_controller.rb
 
-require "open3"
-require "json"
-require "tempfile"
-
 class PdfImportsController < ApplicationController
   before_action :set_store
+  before_action :set_pdf_import, only: [:show]
+
+  def index
+    @pdf_imports = @store.pdf_imports.order(report_date: :desc, created_at: :desc)
+  end
+
+  def show
+  end
 
   def new
   end
-
- def debug
-  require "pdf-reader"
-  reader = PDF::Reader.new("/tmp/test_debug.pdf")
-  lines = []
-  reader.pages.each_with_index do |page, i|
-    page.text.each_line do |line|
-      stripped = line.chomp
-      lines << "P#{i+1}|#{stripped}" if stripped.match?(/ALVEN|ROKRA|456306|618846|490471|535361|541822|531891|539066|556329|556244|597174|600415|426691|575540/)
-    end
-  end
-  render plain: lines.join("\n")
-end
 
   def create
     unless params[:pdf_file].present?
@@ -36,16 +27,31 @@ end
       return render :new, status: :unprocessable_entity
     end
 
-    @date        = result[:date]
-    @pa_counts   = result[:pa_counts]
-    @user_counts = result[:user_counts]
+    @pdf_import = @store.pdf_imports.build(
+      report_date: result[:date],
+      pa_counts:   result[:pa_counts],
+      user_counts: result[:user_counts]
+    )
 
-    render :results
+    if @pdf_import.save
+      redirect_to pdf_import_path(@pdf_import), notice: "PDF imported successfully."
+    else
+      flash.now[:alert] = "Could not save import: #{@pdf_import.errors.full_messages.to_sentence}"
+      render :new, status: :unprocessable_entity
+    end
   end
 
   private
 
   def set_store
-    @store = Store.find(params[:store_id])
+    if params[:store_id]
+        @store = Store.find(params[:store_id])
+      else
+        @store = PdfImport.find(params[:id]).store
+      end
+  end
+
+  def set_pdf_import
+    @pdf_import = @store.pdf_imports.find(params[:id])
   end
 end
