@@ -1,0 +1,16 @@
+                                          Table "public.pdf_imports"
+   Column    |              Type              | Collation | Nullable |                 Default                 
+-------------+--------------------------------+-----------+----------+-----------------------------------------
+ id          | bigint                         |           | not null | nextval('pdf_imports_id_seq'::regclass)
+ store_id    | bigint                         |           | not null | 
+ report_date | date                           |           |          | 
+ pa_counts   | jsonb                          |           | not null | '{}'::jsonb
+ user_counts | jsonb                          |           | not null | '{}'::jsonb
+ created_at  | timestamp(6) without time zone |           | not null | 
+ updated_at  | timestamp(6) without time zone |           | not null | 
+Indexes:
+    "pdf_imports_pkey" PRIMARY KEY, btree (id)
+    "index_pdf_imports_on_store_id" btree (store_id)
+Foreign-key constraints:
+    "fk_rails_2a4ede7f5d" FOREIGN KEY (store_id) REFERENCES stores(id)
+

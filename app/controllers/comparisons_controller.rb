@@ -60,16 +60,28 @@ class ComparisonsController < ApplicationController
   end
  
   def year
-    date       = params[:year] ? Date.parse("#{params[:year]}-01-01") : Date.today
-    start_date = date.beginning_of_year
-    end_date   = date.end_of_year
- 
+    # Fiscal year: September 1 – August 31
+    # Determine the fiscal year start based on the selected or current year
+    year = params[:year] ? params[:year].to_i : Date.today.year
+    
+    # If we're before September, the fiscal year started last year
+    fiscal_year_start = if params[:year]
+                          Date.new(year, 9, 1)
+                        elsif Date.today.month < 9
+                          Date.new(Date.today.year - 1, 9, 1)
+                        else
+                          Date.new(Date.today.year, 9, 1)
+                        end
+
+    start_date = fiscal_year_start
+    end_date   = fiscal_year_start + 1.year - 1.day  # August 31
+
     tracker_counts, pdf_counts = aggregated_counts(start_date, end_date)
- 
+
     @chart_data   = build_chart_data_by_month(start_date, end_date)
     @user_charts  = build_user_pie_charts(pdf_counts, tracker_counts)
     @loss_total   = calculate_loss(start_date, end_date)
-    @period_label = date.strftime("%Y")
+    @period_label = "FY #{start_date.strftime('%b %Y')} – #{end_date.strftime('%b %Y')}"
   end
  
   def life
@@ -83,11 +95,161 @@ class ComparisonsController < ApplicationController
     @loss_total   = calculate_loss(first_date, last_date)
     @period_label = "All Time"
   end
+
+
+  # Add these to ComparisonsController, alongside the existing actions
+
+  def counter_day
+    @user_id = params[:user_id]
+    @date    = params[:date] ? Date.parse(params[:date]) : Date.today
+
+    pdf_counts     = aggregated_pdf_counts_for_user(@date, @date, @user_id)
+    tracker_counts = aggregated_tracker_counts_for_user(@date, @date, @user_id)
+
+    total_pdf     = pdf_counts
+    total_tracker = tracker_counts
+
+    @chart_data  = { @date.strftime("%b %d") => percentage(total_tracker, total_pdf) }
+    @user_charts = { @user_id => { "Accurate" => [total_pdf - total_tracker, 0].max, "Inaccurate" => total_tracker } }
+    @loss_total  = calculate_loss_for_user(@date, @date, @user_id)
+    @period_label = "#{@user_id} – #{@date.strftime('%B %d, %Y')}"
+  end
+
+  def counter_week
+    @user_id   = params[:user_id]
+    start_date = params[:start_date] ? Date.parse(params[:start_date]) : Date.today.beginning_of_week
+    end_date   = start_date.end_of_week
+
+    @chart_data   = build_counter_chart_by_day(@user_id, start_date, end_date)
+    @user_charts  = build_single_user_pie(@user_id, start_date, end_date)
+    @loss_total   = calculate_loss_for_user(start_date, end_date, @user_id)
+    @period_label = "#{@user_id} – #{start_date.strftime('%b %d')} – #{end_date.strftime('%b %d, %Y')}"
+  end
+
+  def counter_month
+    @user_id   = params[:user_id]
+    date       = params[:month] ? Date.parse("#{params[:month]}-01") : Date.today
+    start_date = date.beginning_of_month
+    end_date   = date.end_of_month
+
+    @chart_data   = build_counter_chart_by_day(@user_id, start_date, end_date)
+    @user_charts  = build_single_user_pie(@user_id, start_date, end_date)
+    @loss_total   = calculate_loss_for_user(start_date, end_date, @user_id)
+    @period_label = "#{@user_id} – #{date.strftime('%B %Y')}"
+  end
+
+  def counter_year
+    @user_id = params[:user_id]
+    year     = params[:year] ? params[:year].to_i : Date.today.year
+
+    fiscal_year_start = if params[:year]
+                          Date.new(year, 9, 1)
+                        elsif Date.today.month < 9
+                          Date.new(Date.today.year - 1, 9, 1)
+                        else
+                          Date.new(Date.today.year, 9, 1)
+                        end
+
+    start_date = fiscal_year_start
+    end_date   = fiscal_year_start + 1.year - 1.day
+
+    @chart_data   = build_counter_chart_by_month(@user_id, start_date, end_date)
+    @user_charts  = build_single_user_pie(@user_id, start_date, end_date)
+    @loss_total   = calculate_loss_for_user(start_date, end_date, @user_id)
+    @period_label = "#{@user_id} – FY #{start_date.strftime('%b %Y')} – #{end_date.strftime('%b %Y')}"
+  end
+
+  def counter_life
+    @user_id   = params[:user_id]
+    first_date = @store.trackers.minimum(:date) || Date.today
+    last_date  = @store.trackers.maximum(:date) || Date.today
+
+    @chart_data   = build_counter_chart_by_month(@user_id, first_date, last_date)
+    @user_charts  = build_single_user_pie(@user_id, first_date, last_date)
+    @loss_total   = calculate_loss_for_user(first_date, last_date, @user_id)
+    @period_label = "#{@user_id} – All Time"
+  end
+  
  
   private
  
   def set_store
     @store = Store.find(params[:store_id])
+  end
+
+  # Add these to the private section of ComparisonsController
+
+  def aggregated_pdf_counts_for_user(start_date, end_date, user_id)
+    @store.pdf_imports
+          .where(report_date: start_date..end_date)
+          .sum { |import| import.user_counts[user_id].to_i }
+  end
+
+  def aggregated_tracker_counts_for_user(start_date, end_date, user_id)
+    @store.trackers
+          .where(date: start_date..end_date)
+          .where(counter: user_id)
+          .count
+  end
+
+  def calculate_loss_for_user(start_date, end_date, user_id)
+    @store.trackers
+          .where(date: start_date..end_date)
+          .where(counter: user_id)
+          .where.not(counted: nil)
+          .where.not(sss_inv_count: nil)
+          .where.not(price: nil)
+          .sum("(counted - sss_inv_count) * price")
+          .round(2)
+  end
+
+  def build_counter_chart_by_day(user_id, start_date, end_date)
+    tracker_by_date = @store.trackers
+                            .where(date: start_date..end_date)
+                            .where(counter: user_id)
+                            .group(:date)
+                            .count
+
+    pdf_by_date = @store.pdf_imports
+                        .where(report_date: start_date..end_date)
+                        .each_with_object(Hash.new(0)) do |import, hash|
+                          hash[import.report_date] += import.user_counts[user_id].to_i
+                        end
+
+    (start_date..end_date).each_with_object({}) do |date, hash|
+      t = tracker_by_date[date] || 0
+      p = pdf_by_date[date] || 0
+      hash[date.strftime("%b %d")] = percentage(t, p)
+    end
+  end
+
+  def build_counter_chart_by_month(user_id, start_date, end_date)
+    tracker_by_month = @store.trackers
+                             .where(date: start_date..end_date)
+                             .where(counter: user_id)
+                             .group_by_month(:date, format: "%b %Y")
+                             .count
+
+    pdf_by_month = @store.pdf_imports
+                         .where(report_date: start_date..end_date)
+                         .each_with_object(Hash.new(0)) do |import, hash|
+                           key = import.report_date.strftime("%b %Y")
+                           hash[key] += import.user_counts[user_id].to_i
+                         end
+
+    all_keys = (tracker_by_month.keys + pdf_by_month.keys).uniq.sort_by { |k| Date.parse("01 #{k}") }
+    all_keys.each_with_object({}) do |key, hash|
+      t = tracker_by_month[key] || 0
+      p = pdf_by_month[key] || 0
+      hash[key] = percentage(t, p)
+    end
+  end
+
+  def build_single_user_pie(user_id, start_date, end_date)
+    pdf_count     = aggregated_pdf_counts_for_user(start_date, end_date, user_id)
+    tracker_count = aggregated_tracker_counts_for_user(start_date, end_date, user_id)
+    accurate      = [pdf_count - tracker_count, 0].max
+    { user_id => { "Accurate" => accurate, "Inaccurate" => tracker_count } }
   end
  
   def shared_dates

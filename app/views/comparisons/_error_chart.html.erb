@@ -1,25 +1,26 @@
 <%# app/views/comparisons/_error_chart.html.erb %>
 <%# Locals: chart_data, period_label, user_charts, loss_total %>
 
-<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
-  <h3 style="margin: 0;">Error Rate: <%= period_label %></h3>
-  <span style="font-size: 1.1rem; font-weight: bold; color: <%= loss_total >= 0 ? '#2ecc71' : '#e74c3c' %>;">
-    Total: <%= number_to_currency(loss_total) %> SSSavings!
-  </span>
-</div>
-
-<div style="margin-bottom: 1.5rem;">
-  <p style="color: #666; font-size: 0.9rem; margin: 0;">
-    % of tracker errors relative to total PDF counts
-  </p>
-  <%= line_chart chart_data,
-        xtitle: "Period",
-        ytitle: "Error %",
-        suffix: "%",
-        colors: ["#e74c3c"],
-        curve: false,
-        points: true,
-        library: { scales: { y: { min: 0 } } } %>
+<div class="card">
+  <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
+    <h3 style="margin: 0;">Error Rate: <%= period_label %></h3>
+    <span style="font-size: 1.1rem; font-weight: bold; color: <%= loss_total >= 0 ? '#2ecc71' : '#e74c3c' %>;">
+      Total: <%= number_to_currency(loss_total) %> SSSavings!
+    </span>
+  </div>
+  <div style="margin-bottom: 1.5rem;">
+    <p style="color: #666; font-size: 0.9rem; margin: 0;">
+      % of tracker errors relative to total PDF counts
+    </p>
+    <%= line_chart chart_data,
+          xtitle: "Period",
+          ytitle: "Error %",
+          suffix: "%",
+          colors: ["#e74c3c"],
+          curve: false,
+          points: true,
+          library: { scales: { y: { min: 0 } } } %>
+  </div>
 </div>
 
 <% if user_charts.any? %>
@@ -27,14 +28,18 @@
   <div style="display: flex; flex-wrap: wrap; gap: 2rem; margin-top: 1rem;">
     <% user_charts.each do |user_id, data| %>
       <div style="min-width: 220px;">
-        <h4 style="text-align: center; margin-bottom: 0.5rem;"><%= user_id %></h4>
-        <%= pie_chart data,
-              colors: ["#2ecc71", "#e74c3c"],
-              legend: true,
-              height: "200px" %>
-        <p style="text-align: center; font-size: 0.85rem; color: #555;">
-          <%= data["Accurate"] %> accurate / <%= data["Inaccurate"] %> inaccurate
-        </p>
+        <div class="card">
+          <h4 style="text-align: center; margin-bottom: 0.5rem;">
+            <%= link_to user_id, counter_day_store_comparisons_path(@store, user_id: user_id) %>
+          </h4>
+          <%= pie_chart data,
+                colors: ["#2ecc71", "#e74c3c"],
+                legend: true,
+                height: "200px" %>
+          <p style="text-align: center; font-size: 0.85rem; color: #555;">
+            <%= data["Accurate"] %> accurate / <%= data["Inaccurate"] %> inaccurate
+          </p>
+        </div>
       </div>
     <% end %>
   </div>

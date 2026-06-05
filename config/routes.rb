@@ -31,6 +31,12 @@
         get :month
         get :year
         get :life
+
+        get :counter_day
+        get :counter_week
+        get :counter_month
+        get :counter_year
+        get :counter_life
       end
     end
 

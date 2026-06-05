@@ -1,13 +1,48 @@
 <%# app/views/comparisons/day.html.erb %>
 
-<h1>Daily Comparison</h1>Storename %></h2>
+<h1>Daily Comparison <%= @store.Storename %> </h2>
 
-<%= form_with url: day_store_comparisons_path(@store), method: :get do |f| %>
-  <%= f.date_field :date, value: @date %>
-  <%= f.submit "Go" %>
-<% end %>
+<div class="row">
 
-<%= render "error_chart", chart_data: @chart_data, period_label: @period_label, user_charts: @user_charts, loss_total: @loss_total %>
+  <div class="card col-2">
+    <%= form_with url: day_store_comparisons_path(@store), method: :get do |f| %>
+      <%= f.date_field :date, value: @date %>
+      <%= f.submit "Go" %>
+    <% end %>
+  </div>
+
+    <div class="card col-1">
+
+      <%= link_to "Day", day_store_comparisons_path(@store) %>
+    </div>
+
+  <div class="card col-1">
+    <%= link_to "Week", week_store_comparisons_path(@store) %>
+  </div>
+
+
+  <div class="card col-1">
+    <%= link_to "Month", month_store_comparisons_path(@store) %>
+  </div>
+
+  <div class="card col-1">
+    <%= link_to "Year", year_store_comparisons_path(@store) %>
+  </div>
+
+  <div class="card col-1">
+    <%= link_to "Life", life_store_comparisons_path(@store) %>
+  </div>
+
+</div>
+
+
+
+
+  <%= render "error_chart", chart_data: @chart_data, period_label: @period_label, user_charts: @user_charts, loss_total: @loss_total %>
+
+
+
+
 
 <% if @pdf_imports_for_date.count > 1 && @selected_pdf.nil? %>
   <h3>Multiple PDFs for this date — pick one:</h3>

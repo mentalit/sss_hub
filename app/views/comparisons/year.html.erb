@@ -1,14 +1,37 @@
 <%# app/views/comparisons/year.html.erb %>
 
-<h1>Yearly Comparison</h1>
-<h2>Store: <%= @store.Storename %></h2>
+<h1>Yearly Comparison <%= @store.Storename %> </h2><div class="row">
 
-<h2>Store: <%= @store.Storename %></h2>
+  <div class="card col-2">
+    <%= form_with url: day_store_comparisons_path(@store), method: :get do |f| %>
+      <%= f.date_field :date, value: @date %>
+      <%= f.submit "Go" %>
+    <% end %>
+  </div>
 
-<%= form_with url: week_store_comparisons_path(@store), method: :get do |f| %>
-  <%= f.date_field :start_date %>
-  <%= f.submit "Go" %>
-<% end %>
+    <div class="card col-1">
+
+      <%= link_to "Day", day_store_comparisons_path(@store) %>
+    </div>
+
+  <div class="card col-1">
+    <%= link_to "Week", week_store_comparisons_path(@store) %>
+  </div>
+
+
+  <div class="card col-1">
+    <%= link_to "Month", month_store_comparisons_path(@store) %>
+  </div>
+
+  <div class="card col-1">
+    <%= link_to "Year", year_store_comparisons_path(@store) %>
+  </div>
+
+  <div class="card col-1">
+    <%= link_to "Life", life_store_comparisons_path(@store) %>
+  </div>
+
+</div>
 
 <%= render "error_chart", chart_data: @chart_data, period_label: @period_label, user_charts: @user_charts, loss_total: @loss_total %>
 

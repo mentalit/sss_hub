@@ -1,8 +1,27 @@
-
-
 @import 'bootstrap/scss/bootstrap';
 @import 'bootstrap-icons/font/bootstrap-icons';
 
+// 2. Your custom overrides (placed AFTER imports)
+.card {
+  border: 2px solid black;
+  
+  margin: 1px;
+}
+
+.row {
+  justify-content: center;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid black;
+  padding: 8px;
+}
+
 body {
-	background-color: red;
+  background: yellow;
 }

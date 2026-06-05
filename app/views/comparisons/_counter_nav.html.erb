@@ -1,0 +1,23 @@
+<%# app/views/comparisons/_counter_nav.html.erb %>
+<%# Locals: store, user_id %>
+
+
+  <div class="card col-1">
+    <%= link_to "Day",   counter_day_store_comparisons_path(store,   user_id: user_id) %>
+  </div>
+  <div class="card col-1">
+    <%= link_to "Week",  counter_week_store_comparisons_path(store,  user_id: user_id) %>
+  </div>
+  <div class="card col-1">
+    <%= link_to "Month", counter_month_store_comparisons_path(store, user_id: user_id) %>
+  </div>
+  <div class="card col-1">
+    <%= link_to "Year",  counter_year_store_comparisons_path(store,  user_id: user_id) %>
+  </div>
+  <div class="card col-1">
+    <%= link_to "Life",  counter_life_store_comparisons_path(store,  user_id: user_id) %>
+  </div>
+  <div class="card col-1">
+    <%= link_to "Back to Store", store %>
+  
+</div>
