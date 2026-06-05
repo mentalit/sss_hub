@@ -1,6 +1,5 @@
 <%# app/views/comparisons/counter_day.html.erb %>
 
-
 <h1>Daily Comparison <%= @store.Storename %></h1>
 
 <div class="row">
@@ -11,14 +10,11 @@
       <%= f.submit "Go" %>
     <% end %>
   </div>
+  
 
   <%= render "counter_nav", store: @store, user_id: @user_id %>
 
-  
 </div>
-
-
-  
 
 
 <%= render "error_chart", chart_data: @chart_data, period_label: @period_label, user_charts: @user_charts, loss_total: @loss_total %>

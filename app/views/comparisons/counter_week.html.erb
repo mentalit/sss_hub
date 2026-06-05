@@ -1,34 +1,16 @@
-<h1>Weekly Comparison <%= @store.Storename %> </h2>
+<h1>Weekly Comparison <%= @store.Storename %></h1>
 
 <div class="row">
-
   <div class="card col-2">
-    <%= form_with url: day_store_comparisons_path(@store), method: :get do |f| %>
+    <%= form_with url: counter_day_store_comparisons_path(@store), method: :get do |f| %>
+      <%= f.hidden_field :user_id, value: @user_id %>
       <%= f.date_field :date, value: @date %>
       <%= f.submit "Go" %>
     <% end %>
   </div>
 
-    <div class="card col-1">
-
-      <%= link_to "Day", counter_day_store_comparisons_path(@store) %>
-    </div>
-
-  <div class="card col-1">
-    <%= link_to "Week", counter_week_store_comparisons_path(@store) %>
-  </div>
-
-
-  <div class="card col-1">
-    <%= link_to "Month", counter_month_store_comparisons_path(@store) %>
-  </div>
-
-  <div class="card col-1">
-    <%= link_to "Year", counter_year_store_comparisons_path(@store) %>
-  </div>
-
-  <div class="card col-1">
-    <%= link_to "Life", counter_life_store_comparisons_path(@store) %>
-  </div>
-
+  <%= render "counter_nav", store: @store, user_id: @user_id %>
 </div>
+
+
+<%= render "error_chart", chart_data: @chart_data, period_label: @period_label, user_charts: @user_charts, loss_total: @loss_total %>

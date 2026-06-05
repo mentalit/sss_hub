@@ -1,4 +1,4 @@
-<h1>Daily Comparison <%= @store.Storename %></h1>
+<h1>Monthlyly Comparison <%= @store.Storename %></h1>
 
 <div class="row">
   <div class="card col-2">
@@ -10,12 +10,7 @@
   </div>
 
   <%= render "counter_nav", store: @store, user_id: @user_id %>
-
-  
 </div>
-
-
-  
 
 
 <%= render "error_chart", chart_data: @chart_data, period_label: @period_label, user_charts: @user_charts, loss_total: @loss_total %>
