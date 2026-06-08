@@ -1,75 +1,30 @@
-# app/services/pdf_import_service.rb
-#
-# Add to Gemfile:  gem "pdf-reader"
-# Then:           bundle install
-#
-# Pure Ruby — works on Linux, macOS, and Windows.
-
 require "pdf-reader"
 
 class PdfImportService
-  # pdf-reader produces three kinds of article rows:
-  #
-  # 1. User on a SEPARATE line above the data line (ALVEN14 case):
-  #    "                             ALVEN14"
-  #    "   00456306  GUNNARED...  Sales  700000  01  3        04:22  3"
-  #
-  # 2. User jammed against time with no space (ROKRA28 case):
-  #    "   10539066  ...  Sales  M12D01  12  48 ROKRA2805:06  48"
-  #
-  # 3. Normal spacing:
-  #    "   00586336  ...  Sales  152300  03  39 EKIGB 04:20  3"
-
-  # A line that is only a User ID (letters+digits, starts with letter, 4+ chars, no article number)
-  STANDALONE_USER = /\A\s*([A-Z][A-Z0-9]{3,})\s*\z/
-
-  # User present with or without space before time HH:MM
-  PAT_WITH_USER = /
-    \d{8}.*?(?:Sales|Storage)\s+  # article + row type
-    (?:(?!\d{2}[\s$])\S+\s+)?     # optional location ID
-    (\d{2})\s+                     # PA
-    \S+\s+                         # qty1
-    (?:\S+\s+)?                    # qty2 (Storage only, optional)
-    ([A-Z][A-Z0-9]+?)              # User ID (non-greedy for jammed case)
-    (?:\s+\d{2}:\d{2}|\d{2}:\d{2}) # time with or without leading space
-  /x
-
-  # User present but NO time (AUTO entries end with user + final count)
-  PAT_NO_TIME = /
-    \d{8}.*?(?:Sales|Storage)\s+
-    (?:(?!\d{2}[\s$])\S+\s+)?
-    (\d{2})\s+
-    \S+\s+
-    ([A-Z][A-Z0-9]+)
-    \s+\d+\s*\z
-  /x
-
-  # User is absent from this line (was on the line above as a standalone)
-  PAT_NO_USER = /
-    \d{8}.*?(?:Sales|Storage)\s+
-    (?:(?!\d{2}[\s$])\S+\s+)?
-    (\d{2})\s+
-    \S+\s+
-    (?:\S+\s+)?
-    \d{2}:\d{2}
-  /x
+  # Standalone user ID line: must contain at least one digit
+  # (pure-alpha words on their own are article name fragments like DRACAENA)
+  STANDALONE_USER        = /\A\s*([A-Z][A-Z0-9]*\d[A-Z0-9]*)\s*\z/
+  PAT_WITH_USER          = /\d{8}.*?(?:Sales|Storage)\s+(?:(?!\d{2}\s)\S+\s+)?(\d{2})\s+\S+\s+(?:\S+\s+)?([A-Z][A-Z0-9]+?)(?:\s+\d{2}:\d{2}|\d{2}:\d{2})/
+  PAT_NO_TIME            = /\d{8}.*?(?:Sales|Storage)\s+(?:(?!\d{2}\s)\S+\s+)?(\d{2})\s+\S+\s+([A-Z][A-Z0-9]+)\s+\d+\s*\z/
+  PAT_NO_USER            = /\d{8}.*?(?:Sales|Storage)\s+(?:(?!\d{2}\s)\S+\s+)?(\d{2})\s+\S+\s+(?:\S+\s+)?\d{2}:\d{2}/
+  STRIP_CHECK_USER       = /\s*\(§\).*\z/
+  STRIP_AFTER_FIRST_USER = /(\d{2}:\d{2}\s+\S+)\s+\d+\s+[A-Z][A-Z0-9]+.*\z/
 
   def initialize(file)
     @file = file
   end
 
   def call
-    reader      = PDF::Reader.new(path_or_io)
-    date        = extract_date(reader.pages.first.text)
-    pa_counts   = Hash.new(0)
-    user_counts = Hash.new(0)
+    reader       = PDF::Reader.new(path_or_io)
+    date         = extract_date(reader.pages.first.text)
+    pa_counts    = Hash.new(0)
+    user_counts  = Hash.new(0)
     pending_user = nil
 
     reader.pages.each do |page|
       page.text.each_line do |line|
         pa, user, pending_user = parse_line(line, pending_user)
         next unless pa
-
         pa_counts[pa]    += 1
         user_counts[user] += 1
       end
@@ -87,32 +42,34 @@ class PdfImportService
 
   private
 
+  def clean_line(line)
+    line.sub(STRIP_CHECK_USER, "").sub(STRIP_AFTER_FIRST_USER, '\1')
+  end
+
   def parse_line(line, pending_user)
     stripped = line.strip
     return [nil, nil, pending_user] if stripped.empty?
     return [nil, nil, pending_user] if stripped.match?(/Comment|Total/)
 
-    # Standalone user ID line — store it for the next article line
+    # Standalone user ID — must contain a digit to exclude article name fragments
     if (su = STANDALONE_USER.match(stripped)) && !stripped.match?(/\d{8}/)
       return [nil, nil, su[1]]
     end
 
-    # User present with timestamp (normal or jammed)
-    if (m = PAT_WITH_USER.match(line))
+    cleaned = clean_line(line)
+
+    if (m = PAT_WITH_USER.match(cleaned))
       return [m[1], m[2], nil]
     end
 
-    # User present but no timestamp (AUTO)
-    if (m = PAT_NO_TIME.match(line))
+    if (m = PAT_NO_TIME.match(cleaned))
       return [m[1], m[2], nil]
     end
 
-    # No user on this line — use pending from previous line
-    if (m = PAT_NO_USER.match(line)) && pending_user
+    if (m = PAT_NO_USER.match(cleaned)) && pending_user
       return [m[1], pending_user, nil]
     end
 
-    # Not an article row — preserve pending_user only if no article number present
     next_pending = stripped.match?(/\d{8}/) ? nil : pending_user
     [nil, nil, next_pending]
   end

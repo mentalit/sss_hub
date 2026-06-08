@@ -173,8 +173,12 @@ class ComparisonsController < ApplicationController
  
   private
  
+  # def set_store
+  #   @store = Store.find(params[:store_id])
+  # end
+
   def set_store
-    @store = Store.find(params[:store_id])
+    @store = Store.find(params[:store_id] || 1)
   end
 
   # Add these to the private section of ComparisonsController

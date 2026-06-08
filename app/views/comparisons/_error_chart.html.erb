@@ -1,7 +1,7 @@
 <%# app/views/comparisons/_error_chart.html.erb %>
 <%# Locals: chart_data, period_label, user_charts, loss_total %>
-
-<div class="card">
+<div class="row m-0 p-0">
+<div class="card col-5">
   <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
     <h3 style="margin: 0;">Error Rate: <%= period_label %></h3>
     <span style="font-size: 1.1rem; font-weight: bold; color: <%= loss_total >= 0 ? '#2ecc71' : '#e74c3c' %>;">
@@ -21,6 +21,32 @@
           points: true,
           library: { scales: { y: { min: 0 } } } %>
   </div>
+
+
+</div>
+
+<div class="card col-5">
+  <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
+    <h3 style="margin: 0;">Error Rate: <%= period_label %></h3>
+    <span style="font-size: 1.1rem; font-weight: bold; color: <%= loss_total >= 0 ? '#2ecc71' : '#e74c3c' %>;">
+      Total: <%= number_to_currency(loss_total) %> SSSavings!
+    </span>
+  </div>
+  <div style="margin-bottom: 1.5rem;">
+    <p style="color: #666; font-size: 0.9rem; margin: 0;">
+      % of tracker errors relative to total PDF counts
+    </p>
+    <%= line_chart chart_data,
+          xtitle: "Period",
+          ytitle: "Error %",
+          suffix: "%",
+          colors: ["#e74c3c"],
+          curve: false,
+          points: true,
+          library: { scales: { y: { min: 0 } } } %>
+  </div>
+</div>
+
 </div>
 
 <% if user_charts.any? %>

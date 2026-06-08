@@ -16,7 +16,7 @@
 # config/routes.rb
 
 
-  root "stores#index"
+  root "comparisons#day"
 
   resources :stores, shallow: true do
     resources :trackers,     only: [:index, :new, :create]
