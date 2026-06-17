@@ -1,6 +1,4 @@
-<%# app/views/comparisons/month.html.erb %>
-
-<h1>Monthly Comparison <%= @store.Storename %> </h2>
+<h1>Yearly Comparison <%= @counter.user_id %> </h2>
 
 <div class="row">
 
@@ -15,7 +13,4 @@
 
 </div>
 
-<%= render "error_chart", chart_data: @chart_data, period_label: @period_label, user_charts: @user_charts, loss_total: @loss_total %>
-
-<br>
-<%= link_to "Back to Store", @store %>
+<%= render "comparisons/error_chart", chart_data: @chart_data, period_label: @period_label, user_charts: @user_charts, loss_total: @loss_total %>

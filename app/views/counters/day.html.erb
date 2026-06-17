@@ -1,0 +1,20 @@
+<%# app/views/comparisons/counter_day.html.erb %>
+
+<h1> <%= @counter.user_id %></h1>
+
+<div class="row">
+  <div class="card col-2">
+    <%= form_with url: counter_day_path(@counter), method: :get do |f| %>
+      <%= f.hidden_field :user_id, value: @user_id %>
+      <%= f.date_field :date, value: @date %>
+      <%= f.submit "Go" %>
+    <% end %>
+  </div>
+  
+
+  <%= render "comparisons/counter_nav", store: @store, user_id: @user_id %>
+
+</div>
+
+
+<%= render "comparisons/error_chart", chart_data: @chart_data, period_label: @period_label, user_charts: @user_charts, loss_total: @loss_total %>

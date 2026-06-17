@@ -14,52 +14,60 @@ class PdfImportsController < ApplicationController
   def new
   end
 
-  def create
-    files = Array(params[:pdf_files]).select { |f| f.respond_to?(:read) }
+ def create
+  files = Array(params[:pdf_files]).select { |f| f.respond_to?(:read) }
 
-    if files.empty?
-      flash.now[:alert] = "Please select at least one PDF file."
-      return render :new, status: :unprocessable_entity
-    end
-
-    imported = []
-    skipped  = []
-    errors   = []
-
-    files.each do |file|
-      result = PdfImportService.new(file).call
-
-      if result[:error].present?
-        errors << "#{file.original_filename}: #{result[:error]}"
-        next
-      end
-
-      if result[:date] && @store.pdf_imports.exists?(report_date: result[:date])
-        skipped << "#{file.original_filename} (#{result[:date]} already imported)"
-        next
-      end
-
-      pdf_import = @store.pdf_imports.build(
-        report_date: result[:date],
-        pa_counts:   result[:pa_counts],
-        user_counts: result[:user_counts]
-      )
-
-      if pdf_import.save
-        imported << file.original_filename
-      else
-        errors << "#{file.original_filename}: #{pdf_import.errors.full_messages.to_sentence}"
-      end
-    end
-
-    messages = []
-    messages << "Imported: #{imported.join(', ')}"             if imported.any?
-    messages << "Skipped (duplicates): #{skipped.join(', ')}"  if skipped.any?
-    messages << "Errors: #{errors.join(', ')}"                 if errors.any?
-
-    redirect_to store_pdf_imports_path(@store), notice: messages.join(" | ")
+  if files.empty?
+    flash.now[:alert] = "Please select at least one PDF file."
+    return render :new, status: :unprocessable_entity
   end
 
+  imported = []
+  skipped  = []
+  errors   = []
+
+  files.each do |file|
+    result = PdfImportService.new(file).call
+
+    if result[:error].present?
+      errors << "#{file.original_filename}: #{result[:error]}"
+      next
+    end
+
+    if result[:date] && @store.pdf_imports.exists?(report_date: result[:date])
+      skipped << "#{file.original_filename} (#{result[:date]} already imported)"
+      next
+    end
+
+    pdf_import = @store.pdf_imports.build(
+      report_date: result[:date],
+      pa_counts:   result[:pa_counts],
+      user_counts: result[:user_counts]
+    )
+
+    if pdf_import.save
+      # Automatically create Counter records
+      result[:user_counts].each_key do |user_id|
+        @store.counters.find_or_create_by(user_id: user_id)
+      end
+
+      imported << file.original_filename
+    else
+      errors << "#{file.original_filename}: #{pdf_import.errors.full_messages.to_sentence}"
+    end
+  end
+
+  messages = []
+  messages << "Imported: #{imported.join(', ')}" if imported.any?
+  messages << "Skipped (duplicates): #{skipped.join(', ')}" if skipped.any?
+  messages << "Errors: #{errors.join(', ')}" if errors.any?
+
+  redirect_to store_pdf_imports_path(@store), notice: messages.join(" | ")
+end
+
+
+
+ 
   private
 
   def set_store

@@ -1,0 +1,16 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Counters" %>
+
+<h1>Counters</h1>
+
+<div id="counters">
+  <% @store.counters.each do |counter| %>
+    <%= render counter %>
+    <p>
+      <%= link_to "Show this counter", counter %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New counter", new_store_counter_path %>

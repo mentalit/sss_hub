@@ -1,5 +1,9 @@
 <%# app/views/comparisons/_error_chart.html.erb %>
 <%# Locals: chart_data, period_label, user_charts, loss_total %>
+
+<%# Start of comparisons charts ############################################################### %>
+
+<% if controller_name == "comparisons" %>
 <div class="row m-0 p-0">
 <div class="card col-5">
   <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
@@ -56,7 +60,8 @@
       <div style="min-width: 220px;">
         <div class="card">
           <h4 style="text-align: center; margin-bottom: 0.5rem;">
-            <%= link_to user_id, counter_day_store_comparisons_path(@store, user_id: user_id) %>
+            <% counter = Counter.find_or_create_by(store_id: @store.id, user_id: user_id) %>
+<%= link_to user_id, counter_path(counter) %>
           </h4>
           <%= pie_chart data,
                 colors: ["#2ecc71", "#e74c3c"],
@@ -69,4 +74,47 @@
       </div>
     <% end %>
   </div>
+<% end %>
+
+<%# end of comparison charts ###########################################################################################%>
+
+<% else %>
+
+<div class="card col-5">
+  <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:.5rem;">
+    <h3 style="margin:0;">
+      <%= @counter.user_id %> Performance
+    </h3>
+
+    <span style="font-size:1.1rem;font-weight:bold;
+                 color:<%= @loss_total >= 0 ? '#2ecc71' : '#e74c3c' %>;">
+      Total Loss:
+      <%= number_to_currency(@loss_total.abs) %>
+    </span>
+  </div>
+
+  <div style="margin-bottom:1.5rem;">
+    <p style="color:#666;font-size:.9rem;margin:0;">
+      Accuracy over <%= @period_label %>
+    </p>
+
+    <%= line_chart @chart_data,
+          xtitle: "Period",
+          ytitle: "Accuracy %",
+          suffix: "%",
+          curve: false,
+          points: true,
+          colors: ["#3498db"],
+          library: {
+            scales: {
+              y: {
+                min: 0,
+                max: 100
+              }
+            }
+          } %>
+
+  </div>
+</div>
+
 <% end %>

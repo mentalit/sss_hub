@@ -1,23 +1,50 @@
 <%# app/views/comparisons/_counter_nav.html.erb %>
 <%# Locals: store, user_id %>
 
+<% if controller_name == "comparisons" %>
+  <div class="card col-1">
+
+      <%= link_to "Day", day_store_comparisons_path(@store) %>
+    </div>
 
   <div class="card col-1">
-    <%= link_to "Day",   counter_day_store_comparisons_path(store,   user_id: user_id) %>
+    <%= link_to "Week", week_store_comparisons_path(@store) %>
   </div>
+
+
   <div class="card col-1">
-    <%= link_to "Week",  counter_week_store_comparisons_path(store,  user_id: user_id) %>
+    <%= link_to "Month", month_store_comparisons_path(@store) %>
   </div>
+
   <div class="card col-1">
-    <%= link_to "Month", counter_month_store_comparisons_path(store, user_id: user_id) %>
+    <%= link_to "Year", year_store_comparisons_path(@store) %>
   </div>
+
   <div class="card col-1">
-    <%= link_to "Year",  counter_year_store_comparisons_path(store,  user_id: user_id) %>
+    <%= link_to "Life", life_store_comparisons_path(@store) %>
   </div>
-  <div class="card col-1">
-    <%= link_to "Life",  counter_life_store_comparisons_path(store,  user_id: user_id) %>
-  </div>
-  <div class="card col-1">
-    <%= link_to "Back to Store", store %>
-  
+ 
+<% else %>
+
+  <div class="row">
+    <div class="card col-1">
+      <%= link_to "Day",   counter_day_path(@counter) %>
+    </div>
+    <div class="card col-1">
+      <%= link_to "Week",  counter_week_path(@counter) %>
+    </div>
+    <div class="card col-1">
+      <%= link_to "Month", counter_month_path(@counter) %>
+    </div>
+    <div class="card col-1">
+      <%= link_to "Year",  counter_year_path(@counter) %>
+    </div>
+    <div class="card col-1">
+      <%= link_to "Life",  counter_life_path(@counter) %>
+    </div>
+    <div class="card col-1">
+      <%= link_to "All Counters", store_counters_path(@store) %>
+    </div>
 </div>
+
+<% end %>

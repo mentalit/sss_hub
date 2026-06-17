@@ -10,9 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_03_155644) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_15_215343) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "counters", force: :cascade do |t|
+    t.date "counter_cert_training"
+    t.datetime "created_at", null: false
+    t.bigint "store_id", null: false
+    t.datetime "updated_at", null: false
+    t.string "user_id"
+    t.index ["store_id"], name: "index_counters_on_store_id"
+  end
 
   create_table "pdf_imports", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -52,6 +61,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_03_155644) do
     t.index ["store_id"], name: "index_trackers_on_store_id"
   end
 
+  add_foreign_key "counters", "stores"
   add_foreign_key "pdf_imports", "stores"
   add_foreign_key "trackers", "stores"
 end

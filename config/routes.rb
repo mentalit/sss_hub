@@ -1,4 +1,5 @@
  Rails.application.routes.draw do
+   
   
   
   
@@ -32,14 +33,18 @@
         get :year
         get :life
 
-        get :counter_day
-        get :counter_week
-        get :counter_month
-        get :counter_year
-        get :counter_life
+       
       end
     end
+    resources :counters do
 
+       get :day
+        get :week
+        get :month
+        get :year
+        get :life
+
+      end
   end
 end
 

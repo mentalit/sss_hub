@@ -10,29 +10,7 @@
     <% end %>
   </div>
 
-    <div class="card col-1">
-
-      <%= link_to "Day", day_store_comparisons_path(@store) %>
-    </div>
-
-  <div class="card col-1">
-    <%= link_to "Week", week_store_comparisons_path(@store) %>
-  </div>
-
-
-  <div class="card col-1">
-    <%= link_to "Month", month_store_comparisons_path(@store) %>
-  </div>
-
-  <div class="card col-1">
-    <%= link_to "Year", year_store_comparisons_path(@store) %>
-  </div>
-
-  <div class="card col-1">
-    <%= link_to "Life", life_store_comparisons_path(@store) %>
-  </div>
-
-</div>
+   <%= render "comparisons/counter_nav", store: @store, user_id: @user_id %>
 
 
 
