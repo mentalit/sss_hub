@@ -32,13 +32,13 @@
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav">
       <li class="nav-item">
-          <%= link_to "Home", root_path, class: "nav-link active" %>
+          <%= link_to "Today", root_path, class: "nav-link active" %>
         </li>
       <li class="nav-item">
           <%= link_to "Store", @store, class: "nav-link active" %>
         </li>
       <li class="nav-item">
-          <%= link_to "Home", root_path, class: "nav-link active" %>
+          <%= link_to "Counters", store_counters_path(@store), class: "nav-link active" %>
         </li>
       <li class="nav-item">
           <%= link_to "Home", root_path, class: "nav-link active" %>
