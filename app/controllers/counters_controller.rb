@@ -15,28 +15,17 @@ class CountersController < ApplicationController
 
   # GET /counters/1 or /counters/1.json
   def show
-     @date = params[:date] ? Date.parse(params[:date]) : Date.today
-
+  @date = params[:date] ? Date.parse(params[:date]) : Date.today
   user_id = @counter.user_id
 
-  pdf_count = aggregated_pdf_counts_for_user(@date, @date, user_id)
+  pdf_count     = aggregated_pdf_counts_for_user(@date, @date, user_id)
   tracker_count = aggregated_tracker_counts_for_user(@date, @date, user_id)
 
-  @chart_data = {
-    @date.strftime("%b %d") => percentage(tracker_count, pdf_count)
-  }
-
-  @user_charts = {
-    user_id => {
-      "Accurate" => [pdf_count - tracker_count, 0].max,
-      "Inaccurate" => tracker_count
-    }
-  }
-
-  @loss_total = calculate_loss_for_user(@date, @date, user_id)
-
+  @chart_data  = { @date.strftime("%b %d") => percentage(tracker_count, pdf_count) }
+  @user_charts = build_single_user_pie(user_id, @date, @date)
+  @loss_total  = calculate_loss_for_user(@date, @date, user_id)
   @period_label = "#{user_id} - #{@date.strftime('%B %d, %Y')}"
-  end 
+end
 
   # GET /counters/new
   def new
@@ -117,59 +106,56 @@ class CountersController < ApplicationController
 end
 
   def week
-    @user_id   = params[:user_id]
-    start_date = params[:start_date] ? Date.parse(params[:start_date]) : Date.today.beginning_of_week
-    end_date   = start_date.end_of_week
+  start_date = params[:start_date] ? Date.parse(params[:start_date]) : Date.today.beginning_of_week
+  end_date   = start_date.end_of_week
+  @start_date = start_date
 
-    @chart_data   = build_counter_chart_by_day(@user_id, start_date, end_date)
-    @user_charts  = build_single_user_pie(@user_id, start_date, end_date)
-    @loss_total   = calculate_loss_for_user(start_date, end_date, @user_id)
-    @period_label = "#{@user_id} – #{start_date.strftime('%b %d')} – #{end_date.strftime('%b %d, %Y')}"
-  end
+  @chart_data   = build_counter_chart_by_day(@counter.user_id, start_date, end_date)
+  @user_charts  = build_single_user_pie(@counter.user_id, start_date, end_date)
+  @loss_total   = calculate_loss_for_user(start_date, end_date, @counter.user_id)
+  @period_label = "#{@counter.user_id} – #{start_date.strftime('%b %d')} – #{end_date.strftime('%b %d, %Y')}"
+end
 
   def month
-    @user_id   = params[:user_id]
-    date       = params[:month] ? Date.parse("#{params[:month]}-01") : Date.today
-    start_date = date.beginning_of_month
-    end_date   = date.end_of_month
+  date       = params[:month] ? Date.parse("#{params[:month]}-01") : Date.today
+  start_date = date.beginning_of_month
+  end_date   = date.end_of_month
+  @date      = date
 
-    @chart_data   = build_counter_chart_by_day(@user_id, start_date, end_date)
-    @user_charts  = build_single_user_pie(@user_id, start_date, end_date)
-    @loss_total   = calculate_loss_for_user(start_date, end_date, @user_id)
-    @period_label = "#{@user_id} – #{date.strftime('%B %Y')}"
-  end
+  @chart_data   = build_counter_chart_by_day(@counter.user_id, start_date, end_date)
+  @user_charts  = build_single_user_pie(@counter.user_id, start_date, end_date)
+  @loss_total   = calculate_loss_for_user(start_date, end_date, @counter.user_id)
+  @period_label = "#{@counter.user_id} – #{date.strftime('%B %Y')}"
+end
 
   def year
-    @user_id = params[:user_id]
-    year     = params[:year] ? params[:year].to_i : Date.today.year
+  @year    = params[:year] ? params[:year].to_i : Date.today.year
+  fiscal_year_start = if params[:year]
+                        Date.new(@year, 9, 1)
+                      elsif Date.today.month < 9
+                        Date.new(Date.today.year - 1, 9, 1)
+                      else
+                        Date.new(Date.today.year, 9, 1)
+                      end
 
-    fiscal_year_start = if params[:year]
-                          Date.new(year, 9, 1)
-                        elsif Date.today.month < 9
-                          Date.new(Date.today.year - 1, 9, 1)
-                        else
-                          Date.new(Date.today.year, 9, 1)
-                        end
+  start_date = fiscal_year_start
+  end_date   = fiscal_year_start + 1.year - 1.day
 
-    start_date = fiscal_year_start
-    end_date   = fiscal_year_start + 1.year - 1.day
-
-    @chart_data   = build_counter_chart_by_month(@user_id, start_date, end_date)
-    @user_charts  = build_single_user_pie(@user_id, start_date, end_date)
-    @loss_total   = calculate_loss_for_user(start_date, end_date, @user_id)
-    @period_label = "#{@user_id} – FY #{start_date.strftime('%b %Y')} – #{end_date.strftime('%b %Y')}"
-  end
+  @chart_data   = build_counter_chart_by_month(@counter.user_id, start_date, end_date)
+  @user_charts  = build_single_user_pie(@counter.user_id, start_date, end_date)
+  @loss_total   = calculate_loss_for_user(start_date, end_date, @counter.user_id)
+  @period_label = "#{@counter.user_id} – FY #{start_date.strftime('%b %Y')} – #{end_date.strftime('%b %Y')}"
+end
 
   def life
-    @user_id   = params[:user_id]
-    first_date = @store.trackers.minimum(:date) || Date.today
-    last_date  = @store.trackers.maximum(:date) || Date.today
+  first_date = @store.trackers.minimum(:date) || Date.today
+  last_date  = @store.trackers.maximum(:date) || Date.today
 
-    @chart_data   = build_counter_chart_by_month(@user_id, first_date, last_date)
-    @user_charts  = build_single_user_pie(@user_id, first_date, last_date)
-    @loss_total   = calculate_loss_for_user(first_date, last_date, @user_id)
-    @period_label = "#{@user_id} – All Time"
-  end
+  @chart_data   = build_counter_chart_by_month(@counter.user_id, first_date, last_date)
+  @user_charts  = build_single_user_pie(@counter.user_id, first_date, last_date)
+  @loss_total   = calculate_loss_for_user(first_date, last_date, @counter.user_id)
+  @period_label = "#{@counter.user_id} – All Time"
+end
 
   #############################################################################################
 

@@ -1,7 +1,18 @@
 <div id="<%= dom_id counter %>">
+
+  <% is_no_cert = counter.no_cert? %>
+
   <div>
     <strong>User:</strong>
-    <%= counter.user_id %>
+
+    <%= link_to counter.user_id,
+                counter_path(counter),
+                class: counter.needs_red? ? "text-danger" : "" %>
+
+    <% if is_no_cert %>
+      <span style="color: #888; font-size: 0.8rem;">(NO CERT)</span>
+    <% end %>
+
   </div>
 
   <div>

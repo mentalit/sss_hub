@@ -1,16 +1,13 @@
-<h1>Yearly Comparison <%= @counter.user_id %> </h2>
+<h1><%= @counter.user_id %></h1>
 
 <div class="row">
-
   <div class="card col-2">
-    <%= form_with url: day_store_comparisons_path(@store), method: :get do |f| %>
-      <%= f.date_field :date, value: @date %>
+    <%= form_with url: counter_year_path(@counter), method: :get do |f| %>
+      <%= f.number_field :year, value: @year %>
       <%= f.submit "Go" %>
     <% end %>
   </div>
-
-    <%= render "comparisons/counter_nav", store: @store, user_id: @user_id %>
-
+  <%= render "counters/nav" %>
 </div>
 
 <%= render "comparisons/error_chart", chart_data: @chart_data, period_label: @period_label, user_charts: @user_charts, loss_total: @loss_total %>

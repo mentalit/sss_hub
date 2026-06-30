@@ -58,18 +58,18 @@ class TrackerExcelImporter
       next if row.compact.empty?
 
       attributes =
-      mapped_headers.each_with_index.each_with_object({}) do |(header, index), hash|
-        next if header.nil?
+        mapped_headers.each_with_index.each_with_object({}) do |(header, index), hash|
+          next if header.nil?
 
-        value = row[index]
+          value = row[index]
 
-        hash[header] =
-          if value.is_a?(String)
-            value.strip
-          else
-            value
-          end
-      end
+          hash[header] =
+            if value.is_a?(String)
+              value.strip
+            else
+              value
+            end
+        end
 
       if attributes[:art_num].blank?
         Rails.logger.warn "Skipped row #{i}: missing ArtNum"
@@ -77,32 +77,28 @@ class TrackerExcelImporter
         next
       end
 
-      tracker = @store.trackers.new(
-  date:               parse_date(attributes[:date]),
-  art_num:            attributes[:art_num].to_s.strip.presence,
-  art_name:           attributes[:art_name].to_s.strip.presence,
-  boh:                to_integer(attributes[:boh]),
-  counter:            attributes[:counter].to_s.strip.presence,
-  counted:            to_integer(attributes[:counted]),
-  initial_diff:       to_integer(attributes[:initial_diff]),
-  sss_inv_count:      to_integer(attributes[:sss_inv_count]),
-  price:              to_decimal(attributes[:price]),
-  initial_loss:       to_decimal(attributes[:initial_loss]),
-  diff_after_recount: to_integer(attributes[:diff_after_recount]),
-  loss_after_recount: to_decimal(attributes[:loss_after_recount]),
-  slid_h:             attributes[:slid_h].to_s.strip.presence,
-  comment:            attributes[:comment].to_s.strip.presence
-)
+      attrs = {
+        store_id:           @store.id,
+        date:               parse_date(attributes[:date]),
+        art_num:            attributes[:art_num].to_s.strip.presence,
+        art_name:           attributes[:art_name].to_s.strip.presence,
+        boh:                to_integer(attributes[:boh]),
+        counter:            attributes[:counter].to_s.strip.presence,
+        counted:            to_integer(attributes[:counted]),
+        initial_diff:       to_integer(attributes[:initial_diff]),
+        sss_inv_count:      to_integer(attributes[:sss_inv_count]),
+        price:              to_decimal(attributes[:price]),
+        initial_loss:       to_decimal(attributes[:initial_loss]),
+        diff_after_recount: to_integer(attributes[:diff_after_recount]),
+        loss_after_recount: to_decimal(attributes[:loss_after_recount]),
+        slid_h:             attributes[:slid_h].to_s.strip.presence,
+        comment:            attributes[:comment].to_s.strip.presence,
+        created_at:         Time.current,
+        updated_at:         Time.current
+      }
 
-      if tracker.save
-        imported_count += 1
-      else
-        skipped_count += 1
-
-        Rails.logger.warn(
-          "Skipped row #{i}: #{tracker.errors.full_messages.join(', ')}"
-        )
-      end
+      Tracker.insert(attrs, returning: false, unique_by: [:store_id, :date, :art_num, :counter])
+      imported_count += 1
     end
 
     {

@@ -1,120 +1,136 @@
 <%# app/views/comparisons/_error_chart.html.erb %>
 <%# Locals: chart_data, period_label, user_charts, loss_total %>
 
-<%# Start of comparisons charts ############################################################### %>
-
 <% if controller_name == "comparisons" %>
-<div class="row m-0 p-0">
-<div class="card col-5">
-  <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
-    <h3 style="margin: 0;">Error Rate: <%= period_label %></h3>
-    <span style="font-size: 1.1rem; font-weight: bold; color: <%= loss_total >= 0 ? '#2ecc71' : '#e74c3c' %>;">
-      Total: <%= number_to_currency(loss_total) %> SSSavings!
-    </span>
-  </div>
-  <div style="margin-bottom: 1.5rem;">
-    <p style="color: #666; font-size: 0.9rem; margin: 0;">
-      % of tracker errors relative to total PDF counts
-    </p>
-    <%= line_chart chart_data,
-          xtitle: "Period",
-          ytitle: "Error %",
-          suffix: "%",
-          colors: ["#e74c3c"],
-          curve: false,
-          points: true,
-          library: { scales: { y: { min: 0 } } } %>
-  </div>
+  <div class="row m-0 p-0">
 
+    <div class="card col-5">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
+        <h3 style="margin: 0;">Error Rate: <%= period_label %></h3>
 
-</div>
-
-<div class="card col-5">
-  <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
-    <h3 style="margin: 0;">Error Rate: <%= period_label %></h3>
-    <span style="font-size: 1.1rem; font-weight: bold; color: <%= loss_total >= 0 ? '#2ecc71' : '#e74c3c' %>;">
-      Total: <%= number_to_currency(loss_total) %> SSSavings!
-    </span>
-  </div>
-  <div style="margin-bottom: 1.5rem;">
-    <p style="color: #666; font-size: 0.9rem; margin: 0;">
-      % of tracker errors relative to total PDF counts
-    </p>
-    <%= line_chart chart_data,
-          xtitle: "Period",
-          ytitle: "Error %",
-          suffix: "%",
-          colors: ["#e74c3c"],
-          curve: false,
-          points: true,
-          library: { scales: { y: { min: 0 } } } %>
-  </div>
-</div>
-
-</div>
-
-<% if user_charts.any? %>
-  <h3>Accuracy by User ID</h3>
-  <div style="display: flex; flex-wrap: wrap; gap: 2rem; margin-top: 1rem;">
-    <% user_charts.each do |user_id, data| %>
-      <div style="min-width: 220px;">
-        <div class="card">
-          <h4 style="text-align: center; margin-bottom: 0.5rem;">
-            <% counter = Counter.find_or_create_by(store_id: @store.id, user_id: user_id) %>
-<%= link_to user_id, counter_path(counter) %>
-          </h4>
-          <%= pie_chart data,
-                colors: ["#2ecc71", "#e74c3c"],
-                legend: true,
-                height: "200px" %>
-          <p style="text-align: center; font-size: 0.85rem; color: #555;">
-            <%= data["Accurate"] %> accurate / <%= data["Inaccurate"] %> inaccurate
-          </p>
-        </div>
+        <span style="font-size: 1.1rem; font-weight: bold; color: <%= loss_total >= 0 ? '#2ecc71' : '#e74c3c' %>;">
+          Total: <%= number_to_currency(loss_total) %> SSSavings!
+        </span>
       </div>
-    <% end %>
-  </div>
-<% end %>
 
-<%# end of comparison charts ###########################################################################################%>
+      <div style="margin-bottom: 1.5rem;">
+        <p style="color: #666; font-size: 0.9rem; margin: 0;">
+          % of tracker errors relative to total PDF counts
+        </p>
+
+        <%= line_chart chart_data,
+              xtitle: "Period",
+              ytitle: "Error %",
+              suffix: "%",
+              colors: ["#e74c3c"],
+              curve: false,
+              points: true,
+              library: { scales: { y: { min: 0 } } } %>
+      </div>
+    </div>
+
+    <div class="card col-5">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
+        <h3 style="margin: 0;">Error Rate: <%= period_label %></h3>
+
+        <span style="font-size: 1.1rem; font-weight: bold; color: <%= loss_total >= 0 ? '#2ecc71' : '#e74c3c' %>;">
+          Total: <%= number_to_currency(loss_total) %> SSSavings!
+        </span>
+      </div>
+
+      <div style="margin-bottom: 1.5rem;">
+        <p style="color: #666; font-size: 0.9rem; margin: 0;">
+          % of tracker errors relative to total PDF counts
+        </p>
+
+        <%= line_chart chart_data,
+              xtitle: "Period",
+              ytitle: "Error %",
+              suffix: "%",
+              colors: ["#e74c3c"],
+              curve: false,
+              points: true,
+              library: { scales: { y: { min: 0 } } } %>
+      </div>
+    </div>
+
+  </div>
+
+  <% if user_charts.any? %>
+    <h3>Accuracy by User ID</h3>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 2rem; margin-top: 1rem;">
+
+      <% user_charts.each do |user_id, data| %>
+        <% counter = Counter.find_or_create_by(store_id: @store.id, user_id: user_id) %>
+
+        <% is_red =
+             !counter.no_cert? &&
+             (counter.counter_cert_training.blank? ||
+              counter.counter_cert_training > 1.year.from_now)
+        %>
+
+        <div style="min-width: 220px;">
+          <div class="card">
+
+            <h4 style="text-align: center; margin-bottom: 0.5rem;">
+              <%= link_to user_id,
+                          counter_path(counter),
+                          class: is_red ? "text-danger" : "" %>
+            </h4>
+
+            <%= pie_chart data,
+                  colors: ["#2ecc71", "#e74c3c"],
+                  legend: true,
+                  height: "200px" %>
+
+            <p style="text-align: center; font-size: 0.85rem; color: #555;">
+              <%= data["Accurate"] %> accurate / <%= data["Inaccurate"] %> inaccurate
+            </p>
+
+          </div>
+        </div>
+      <% end %>
+
+    </div>
+  <% end %>
 
 <% else %>
 
-<div class="card col-5">
-  <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:.5rem;">
-    <h3 style="margin:0;">
-      <%= @counter.user_id %> Performance
-    </h3>
+  <div class="card col-5">
+    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:.5rem;">
+      <h3 style="margin:0;">
+        <%= @counter.user_id %> Performance
+      </h3>
 
-    <span style="font-size:1.1rem;font-weight:bold;
-                 color:<%= @loss_total >= 0 ? '#2ecc71' : '#e74c3c' %>;">
-      Total Loss:
-      <%= number_to_currency(@loss_total.abs) %>
-    </span>
-  </div>
+      <span style="font-size:1.1rem;font-weight:bold;
+                   color:<%= @loss_total >= 0 ? '#2ecc71' : '#e74c3c' %>;">
+        Total Loss:
+        <%= number_to_currency(@loss_total.abs) %>
+      </span>
+    </div>
 
-  <div style="margin-bottom:1.5rem;">
-    <p style="color:#666;font-size:.9rem;margin:0;">
-      Accuracy over <%= @period_label %>
-    </p>
+    <div style="margin-bottom:1.5rem;">
+      <p style="color:#666;font-size:.9rem;margin:0;">
+        Accuracy over <%= @period_label %>
+      </p>
 
-    <%= line_chart @chart_data,
-          xtitle: "Period",
-          ytitle: "Accuracy %",
-          suffix: "%",
-          curve: false,
-          points: true,
-          colors: ["#3498db"],
-          library: {
-            scales: {
-              y: {
-                min: 0,
-                max: 100
+      <%= line_chart @chart_data,
+            xtitle: "Period",
+            ytitle: "Accuracy %",
+            suffix: "%",
+            curve: false,
+            points: true,
+            colors: ["#3498db"],
+            library: {
+              scales: {
+                y: {
+                  min: 0,
+                  max: 100
+                }
               }
-            }
-          } %>
-
+            } %>
+    </div>
   </div>
-</div>
 
 <% end %>

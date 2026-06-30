@@ -4,13 +4,17 @@
 
 <h1>Counters</h1>
 
-<div id="counters">
-  <% @store.counters.each do |counter| %>
+<div class="row">
+ 
+  <% @store.counters.sort_by{ |x| x.user_id}.each do |counter| %>
+     <div class="card col-2">
     <%= render counter %>
     <p>
-      <%= link_to "Show this counter", counter %>
+      
     </p>
+   </div>
   <% end %>
+ 
 </div>
 
 <%= link_to "New counter", new_store_counter_path %>

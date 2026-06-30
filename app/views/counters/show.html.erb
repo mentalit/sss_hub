@@ -1,24 +1,35 @@
 <p style="color: green"><%= notice %></p>
+<div class="row">
+  <div class="card col-2">
+  <strong><%= @counter.user_id %></strong>
+  Certified on <%= @counter.counter_cert_training %>
+  </div>
 
-<%= render @counter %>
+ 
+   
 
-<%# app/views/comparisons/counter_day.html.erb %>
-
-<h1><%= @counter.user_id %></h1>
-
-
-  
-
-  <%= render "comparisons/counter_nav", store: @store, user_id: @user_id %>
-
+ 
+   <div class="col-7">
+    <div class="card col-2">
+    <%= form_with url: counter_path(@counter), method: :get do |f| %>
+      <%= f.date_field :date, value: @date %>
+      <%= f.submit "Go" %>
+    <% end %>
+    </div>
+   <%= render "counters/nav" %>
+  </div>
 </div>
 
+
+
+<div class="row">
+ 
+</div>
 
 <%= render "comparisons/error_chart", chart_data: @chart_data, period_label: @period_label, user_charts: @user_charts, loss_total: @loss_total %>
 
 <div>
-  <%= link_to "Edit this counter", edit_counter_path(@counter) %> |
-  <%= link_to "Back to counters", :back %>
-
-  <%= button_to "Destroy this counter", @counter, method: :delete %>
-</div>
+  <%= link_to "Edit", edit_counter_path(@counter) %> |
+  <%= link_to "Back to counters", store_counters_path(@store) %>
+  <%= button_to "Destroy", @counter, method: :delete %>
+</div> 
